@@ -1,11 +1,16 @@
 package com.lyuboslav.transactionpipeline.service;
 
 import com.lyuboslav.transactionpipeline.model.Transaction;
+import com.lyuboslav.transactionpipeline.rules.BlacklistedCountryRule;
+import com.lyuboslav.transactionpipeline.rules.Rule;
+import com.lyuboslav.transactionpipeline.rules.TransactionContext;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import static java.util.concurrent.TimeUnit.*;
 
 @Service
@@ -18,16 +23,29 @@ public class TransactionService {
 		this.redissonClient = redissonClient;
 	}
 
-	public void addTransaction(Transaction transaction) {
+	public boolean isTransactionValid(Transaction transaction) {
 		String key = getTransactionKey(transaction.getUserId());
+		addTransaction(key, transaction);
+
+		List<Transaction> recentTransactionsForUser = getRecentTransactionsForUser(key);
+		Transaction lastTransaction = recentTransactionsForUser.removeLast();
+		TransactionContext transactionContext = new TransactionContext(lastTransaction, recentTransactionsForUser);
+
+		Rule rule = new BlacklistedCountryRule(List.of("Russia", "China"));
+		return rule.applyRule(transactionContext);
+	}
+
+	private void addTransaction(String key, Transaction transaction) {
 		RScoredSortedSet<Transaction> sortedSet = redissonClient.getScoredSortedSet(key);
 
-		sortedSet.add(transaction.getTimestamp().toEpochMilli(), transaction);
+		//todo revert
+		//sortedSet.add(transaction.getTimestamp().toEpochMilli(), transaction);
+		sortedSet.add(System.currentTimeMillis(), transaction);
+
 		redissonClient.getKeys().expire(key, AMOUNT_OF_MINUTES, MINUTES);
 	}
 
-	public ArrayList<Transaction> getRecentTransactionsForUser(String userId) {
-		String key = getTransactionKey(userId);
+	private ArrayList<Transaction> getRecentTransactionsForUser(String key) {
 		RScoredSortedSet<Transaction> sortedSet = redissonClient.getScoredSortedSet(key);
 
 		long now = System.currentTimeMillis();

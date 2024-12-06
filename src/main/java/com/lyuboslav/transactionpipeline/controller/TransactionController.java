@@ -18,8 +18,8 @@ public class TransactionController {
 	}
 
 	@PostMapping
-	public ResponseEntity<String> createTransaction(@RequestBody Transaction transaction) {
-		transactionService.addTransaction(transaction);
-		return ResponseEntity.ok("Transaction processed successfully");
+	public ResponseEntity<Boolean> createTransaction(@RequestBody Transaction transaction) {
+		boolean isValid = transactionService.isTransactionValid(transaction);
+		return ResponseEntity.ok(isValid);
 	}
 }
