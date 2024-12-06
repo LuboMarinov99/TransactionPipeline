@@ -2,6 +2,7 @@ package com.lyuboslav.transactionpipeline.service;
 
 import com.lyuboslav.transactionpipeline.model.Transaction;
 import com.lyuboslav.transactionpipeline.rules.BlacklistedCountryRule;
+import com.lyuboslav.transactionpipeline.rules.MaxDistanceRule;
 import com.lyuboslav.transactionpipeline.rules.Rule;
 import com.lyuboslav.transactionpipeline.rules.TransactionContext;
 import org.redisson.api.RScoredSortedSet;
@@ -32,6 +33,8 @@ public class TransactionService {
 		TransactionContext transactionContext = new TransactionContext(lastTransaction, recentTransactionsForUser);
 
 		Rule rule = new BlacklistedCountryRule(List.of("Russia", "China"));
+		rule.addNextRule(new MaxDistanceRule());
+
 		return rule.applyRule(transactionContext);
 	}
 
