@@ -1,0 +1,9 @@
+version: '2.23.3'
+
+services:
+  transactionpipeline:
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+      args:
+        JAR_FILE: target/

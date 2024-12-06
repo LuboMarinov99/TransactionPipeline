@@ -6,18 +6,20 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RedisConfig {
 
-	private static final String REDIS_ADDRESS = "redis://localhost:6379";
+	@Value("${redis.address}")
+	private String redisAddress;
 
 	@Bean
 	public RedissonClient redissonClient() {
 		Config config = new Config();
-		config.useSingleServer().setAddress(REDIS_ADDRESS);
+		config.useSingleServer().setAddress(redisAddress);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
