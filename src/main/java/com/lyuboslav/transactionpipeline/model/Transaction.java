@@ -1,9 +1,6 @@
 package com.lyuboslav.transactionpipeline.model;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.time.Instant;
 
 public class Transaction {
@@ -54,6 +51,10 @@ public class Transaction {
 	}
 
 	public Instant getTimestamp() {
+		if (timestamp == null) {
+			this.setTimestamp(Instant.now());
+		}
+
 		return timestamp;
 	}
 
