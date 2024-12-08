@@ -28,7 +28,7 @@ public class MaxDistanceRule extends Rule {
 		return applyNextRule(transactionContext);
 	}
 
-	public static boolean isDistanceMoreThanMaxKm(double lat1, double lon1, double lat2, double lon2) {
+	private static boolean isDistanceMoreThanMaxKm(double lat1, double lon1, double lat2, double lon2) {
 		double lat1Rad = Math.toRadians(lat1);
 		double lon1Rad = Math.toRadians(lon1);
 		double lat2Rad = Math.toRadians(lat2);

@@ -14,10 +14,9 @@ public class RuleConfig {
 
 	@Bean
 	public Rule getRuleChain() {
-		Rule rule = new BlacklistedCountryRule(List.of("Russia", "China"));
-		rule.addNextRule(new MaxDistanceRule());
-		rule.addNextRule(new RateLimitRule(1, 10));
-
-		return rule;
+		return new
+				BlacklistedCountryRule(List.of("Russia", "China"))
+				.addNextRule(new MaxDistanceRule())
+				.addNextRule(new RateLimitRule(1, 10));
 	}
 }

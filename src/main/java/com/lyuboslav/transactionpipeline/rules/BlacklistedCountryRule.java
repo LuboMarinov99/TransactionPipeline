@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BlacklistedCountryRule extends Rule {
 
-	private List<String> blacklistedCountries;
+	private final List<String> blacklistedCountries;
 
 	public BlacklistedCountryRule(List<String> blacklistedCountries) {
 		this.blacklistedCountries = blacklistedCountries;
@@ -17,9 +17,5 @@ public class BlacklistedCountryRule extends Rule {
 		}
 
 		return applyNextRule(transactionContext);
-	}
-
-	public void changeBlacklistedCountries(List<String> blacklistedCountries) {
-		this.blacklistedCountries = blacklistedCountries;
 	}
 }
