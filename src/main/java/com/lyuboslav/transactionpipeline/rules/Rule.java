@@ -17,7 +17,7 @@ public abstract class Rule {
 	public abstract boolean applyRule(TransactionContext transactionContext);
 
 	protected boolean applyNextRule(TransactionContext transactionContext) {
-		if(nextRule == null) {
+		if (nextRule == null) {
 			return true;
 		}
 
