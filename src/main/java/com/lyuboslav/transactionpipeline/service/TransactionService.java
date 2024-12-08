@@ -41,6 +41,12 @@ public class TransactionService {
 		return ruleChainResult;
 	}
 
+	/**
+	 * Adds a transaction to the cache. Transactions are grouped by user and are stored in ordered by their timestamp.
+	 * Each time a transaction is added for a user, the TTL of the whole set is extended by 30 minutes.
+	 * @param key - The cache key.
+	 * @param transaction - The incoming transaction to be analysed.
+	 */
 	private void addTransaction(String key, Transaction transaction) {
 		RScoredSortedSet<Transaction> sortedSet = redissonClient.getScoredSortedSet(key);
 		Instant relativeNow = transaction.getTimestamp();
@@ -61,11 +67,19 @@ public class TransactionService {
 		return new TransactionContext(lastTransaction, unmodifiableList(recentTransactionsForUser));
 	}
 
+	/**
+	 * Retrieve the transactions for a user that are within the last 30 minutes. Transactions older than the threshold are removed.
+	 * @param key - The cache key
+	 * @param timestamp - The timestamp of the incoming transaction (The relative now)
+	 * @return - A list of transactions that are within the last 30 minutes.
+	 */
 	private List<Transaction> getRecentTransactionsForUser(String key, Instant timestamp) {
 		RScoredSortedSet<Transaction> sortedSet = redissonClient.getScoredSortedSet(key);
 
 		long relativeNow = timestamp.toEpochMilli();
 		long minutesAgo = timestamp.minusSeconds(AMOUNT_OF_MINUTES * 60).toEpochMilli();
+
+		sortedSet.removeRangeByScore(0, true, minutesAgo, false);
 
 		return (List<Transaction>) sortedSet.valueRange(minutesAgo, true, relativeNow, true);
 	}
