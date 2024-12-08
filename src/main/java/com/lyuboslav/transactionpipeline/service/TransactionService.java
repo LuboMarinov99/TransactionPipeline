@@ -4,10 +4,11 @@ import com.lyuboslav.transactionpipeline.model.Transaction;
 import com.lyuboslav.transactionpipeline.rules.*;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.*;
@@ -18,6 +19,7 @@ public class TransactionService {
 	public static final int AMOUNT_OF_MINUTES = 30;
 	private final RedissonClient redissonClient;
 	private final Rule rule;
+	private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
 	public TransactionService(RedissonClient redissonClient, Rule ruleConfig) {
 		this.redissonClient = redissonClient;
@@ -25,13 +27,18 @@ public class TransactionService {
 	}
 
 	public boolean isTransactionValid(Transaction transaction) {
+		Instant startTime = Instant.now();
 		String key = getTransactionKey(transaction.getUserId());
 		addTransaction(key, transaction);
 
 		List<Transaction> recentTransactionsForUser = getRecentTransactionsForUser(key, transaction.getTimestamp());
 		TransactionContext transactionContext = getTransactionContext(recentTransactionsForUser);
 
-		return rule.applyRule(transactionContext);
+		boolean ruleChainResult = rule.applyRule(transactionContext);
+		Instant endTime = Instant.now();
+		logger.info("Transaction validation took: {} ms", endTime.toEpochMilli() - startTime.toEpochMilli());
+
+		return ruleChainResult;
 	}
 
 	private void addTransaction(String key, Transaction transaction) {
@@ -45,19 +52,22 @@ public class TransactionService {
 	}
 
 	private TransactionContext getTransactionContext(List<Transaction> recentTransactionsForUser) {
+		if(recentTransactionsForUser.isEmpty()) {
+			throw new RuntimeException("No recent transactions found for user");
+		}
 		reverse(recentTransactionsForUser);
 		Transaction lastTransaction = recentTransactionsForUser.removeFirst();
 
 		return new TransactionContext(lastTransaction, unmodifiableList(recentTransactionsForUser));
 	}
 
-	private ArrayList<Transaction> getRecentTransactionsForUser(String key, Instant timestamp) {
+	private List<Transaction> getRecentTransactionsForUser(String key, Instant timestamp) {
 		RScoredSortedSet<Transaction> sortedSet = redissonClient.getScoredSortedSet(key);
 
 		long relativeNow = timestamp.toEpochMilli();
 		long minutesAgo = timestamp.minusSeconds(AMOUNT_OF_MINUTES * 60).toEpochMilli();
 
-		return (ArrayList<Transaction>) sortedSet.valueRange(minutesAgo, true, relativeNow, true);
+		return (List<Transaction>) sortedSet.valueRange(minutesAgo, true, relativeNow, true);
 	}
 
 	private String getTransactionKey(String userId) {

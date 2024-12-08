@@ -28,6 +28,7 @@ public class RateLimitRule extends Rule {
 				.toList();
 
 		if (relevantTransactions.size() == maxTransactions) {
+			logger.info("The transaction does not comply with the rate limit rule.");
 			return false;
 		}
 

@@ -22,6 +22,7 @@ public class MaxDistanceRule extends Rule {
 						transaction.getLongCoord()
 				));
 		if (isInvalid) {
+			logger.info("The transaction does not comply with the max allowed distance rule.");
 			return false;
 		}
 

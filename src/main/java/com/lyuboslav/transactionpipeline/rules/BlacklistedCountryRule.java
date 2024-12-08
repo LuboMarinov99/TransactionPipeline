@@ -13,6 +13,7 @@ public class BlacklistedCountryRule extends Rule {
 	@Override
 	public boolean applyRule(TransactionContext transactionContext) {
 		if (blacklistedCountries.contains(transactionContext.getLastTransaction().getCountry())) {
+			logger.info("The transaction does not comply with the blacklisted country rule.");
 			return false;
 		}
 

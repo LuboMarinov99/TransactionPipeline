@@ -1,6 +1,11 @@
 package com.lyuboslav.transactionpipeline.rules;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class Rule {
+
+	protected static final Logger logger = LoggerFactory.getLogger(Rule.class);
 
 	private Rule nextRule;
 

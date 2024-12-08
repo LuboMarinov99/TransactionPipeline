@@ -12,7 +12,7 @@ public class TransactionContext {
 
 	public TransactionContext(Transaction lastTransaction, List<Transaction> recentTransactions) {
 		this.lastTransaction = lastTransaction;
-		this.recentTransactions =recentTransactions;
+		this.recentTransactions = recentTransactions;
 	}
 
 	public Transaction getLastTransaction() {

@@ -1,29 +1,42 @@
 package com.lyuboslav.transactionpipeline.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
+
 import java.time.Instant;
 
 public class Transaction {
 
 	@JsonProperty
+	@NotNull(message = "Transaction ID cannot be null")
 	private String tranId;
 
 	@JsonProperty
+	@NotNull(message = "User ID cannot be null")
 	private String userId;
 
 	@JsonProperty
+	@NotNull(message = "Amount cannot be null")
 	private double amount;
 
 	@JsonProperty
+	@PastOrPresent(message = "Timestamp must be in the past or present")
 	private Instant timestamp;
 
 	@JsonProperty
+	@NotNull
 	private String country;
 
 	@JsonProperty
+	@NotNull
+	@DecimalMin(value = "-90.00", message = "Latitude must be >= -90")
+	@DecimalMax(value = "90.00", message = "Latitude must be <= 90")
 	private double latCoord;
 
 	@JsonProperty
+	@NotNull
+	@DecimalMin(value = "-180.00", message = "Longitude must be >= -180")
+	@DecimalMax(value = "180.00", message = "Longitude must be <= 180")
 	private double longCoord;
 
 	public String getTranId() {
