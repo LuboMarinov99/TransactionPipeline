@@ -28,6 +28,7 @@ public class MaxCountriesRule extends Rule {
 		Set<String> countries = recentTransactions.stream()
 				.takeWhile(transaction -> transaction.getTimestamp().isAfter(targetTime))
 				.map(Transaction::getCountry)
+				.distinct()
 				.limit(maxCountries)
 				.collect(Collectors.toSet());
 
