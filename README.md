@@ -4,4 +4,4 @@ How to run:
 3. cd to /transactionpipeline/deployment
 4. run 'docker compose up'
 
-Result: A Redis instance will be started on port 6379 and the application will be started on port 8080
+Result: A Redis instance will be started on port 6379 and the application will be started on port 8080. Redis can be monitored on port 8001.
